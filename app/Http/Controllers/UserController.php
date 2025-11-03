@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -32,14 +33,20 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->only(['name', 'email', 'roles']);
-
-        $user = User::create([
-            'name'  => $data['name'] ?? null,
-            'email' => $data['email'] ?? null,
+        //validate input data
+        $data = $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'roles' => 'sometimes|array',
+            'roles.*' => 'integer|exists:roles,id',
         ]);
 
-        if (!empty($data['roles']) && is_array($data['roles'])) {
+        $user = User::create([
+            'name'  => $data['name'],
+            'email' => $data['email'],
+        ]);
+
+        if (!empty($data['roles'])) {
             $user->roles()->sync($data['roles']);
         }
 
@@ -74,11 +81,17 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $data = $request->only(['name', 'email', 'roles']);
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'roles' => 'sometimes|array',
+            'roles.*' => 'integer|exists:roles,id',
+        ]);
 
-        $user->name  = $data['name']  ?? $user->name;
-        $user->email = $data['email'] ?? $user->email;
-        $user->save();
+        $user->update([
+            'name' => $data['name'],
+            'email' => $data['email'],
+        ]);
 
         if ($request->has('roles')) {
             $roles = is_array($data['roles']) ? $data['roles'] : [];
@@ -91,8 +104,10 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(User $user)
     {
-        //
+        $user->delete();
+
+        return redirect()->route('users.index')->with('success', 'User deleted.');
     }
 }
