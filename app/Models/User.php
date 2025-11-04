@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
 
-class User extends Model
+class User extends Authenticatable
 {
-    protected $fillable = ['name', 'email'];
+    use HasApiTokens;
+    protected $fillable = ['name', 'email', 'password'];
+
+    protected $hidden = ['password'];
 
     // Define the relationship with the Post model
     public function posts(){
@@ -16,5 +21,9 @@ class User extends Model
     // Define the relationship with the Role model
     public function roles(){
         return $this->belongsToMany(Role::class)->withTimestamps();
+    }
+
+    public function hasRole($roleName){
+        return $this->roles()->contains('name', $roleName);
     }
 }
