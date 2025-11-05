@@ -1,39 +1,38 @@
 @extends('layouts.admin')
 
-@section('title', 'User details')
+@section('title', 'User Details')
 
 @section('content')
-    <h1>User #{{ $user->id }} — {{ $user->name }}</h1>
+    <h1>User Details</h1>
 
-    <p><strong>Email:</strong> {{ $user->email }}</p>
-    <p><strong>Created:</strong> {{ $user->created_at ?? 'N/A' }}</p>
-    <p><strong>Updated:</strong> {{ $user->updated_at ?? 'N/A' }}</p>
+    <div style="background:#f8f9fa;padding:16px;border-radius:4px;margin-bottom:16px">
+        <div style="margin-bottom:8px">
+            <strong>ID:</strong> {{ $user->id }}
+        </div>
+        <div style="margin-bottom:8px">
+            <strong>Name:</strong> {{ $user->name }}
+        </div>
+        <div style="margin-bottom:8px">
+            <strong>Email:</strong> {{ $user->email }}
+        </div>
+        <div style="margin-bottom:8px">
+            <strong>Roles:</strong>
+            @if($user->roles->isNotEmpty())
+                {{ $user->roles->pluck('name')->join(', ') }}
+            @else
+                <span style="color:#6c757d">No roles assigned</span>
+            @endif
+        </div>
+        <div style="margin-bottom:8px">
+            <strong>Created:</strong> {{ $user->created_at->format('Y-m-d H:i') }}
+        </div>
+        <div>
+            <strong>Updated:</strong> {{ $user->updated_at->format('Y-m-d H:i') }}
+        </div>
+    </div>
 
-    @if(isset($user->roles) && $user->roles->isNotEmpty())
-        <p><strong>Roles:</strong> {{ $user->roles->pluck('name')->join(', ') }}</p>
-    @endif
-
-    @if(isset($user->posts) && $user->posts->isNotEmpty())
-        <h3>Posts</h3>
-        <ul>
-            @foreach($user->posts as $post)
-                <li>
-                    {{ $post->title ?? 'Untitled' }}
-                    <small style="color:#666">({{ $post->created_at ?? '' }})</small>
-                </li>
-            @endforeach
-        </ul>
-    @endif
-
-    <div style="margin-top:12px">
-        <a href="{{ route('users.edit', $user) }}" style="margin-right:8px">Edit</a>
-
-        <form action="{{ route('users.destroy', $user) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete this user?')">
-            @csrf
-            @method('DELETE')
-            <button type="submit" style="background:#ff4d4f;color:#fff;border:none;padding:6px 10px;border-radius:4px;cursor:pointer">Delete</button>
-        </form>
-
-        <a href="{{ route('users.index') }}" style="margin-left:12px">Back to list</a>
+    <div style="display:flex;gap:8px">
+        <a href="{{ route('users.edit', $user) }}" style="background:#0366d6;color:#fff;padding:8px 12px;border-radius:4px;text-decoration:none">Edit</a>
+        <a href="{{ route('users.index') }}" style="color:#0366d6;text-decoration:none;padding:8px 12px">Back to list</a>
     </div>
 @endsection

@@ -16,6 +16,17 @@
         @error('email') <div style="color:#b91c1c;margin-top:4px">{{ $message }}</div> @enderror
     </div>
 
+    <div style="margin-bottom:8px">
+        <label for="password">Password @if(!empty($user->id))(leave blank to keep current)@endif</label><br>
+        <input id="password" name="password" type="password" autocomplete="new-password" style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px">
+        @error('password') <div style="color:#b91c1c;margin-top:4px">{{ $message }}</div> @enderror
+    </div>
+
+    <div style="margin-bottom:8px">
+        <label for="password_confirmation">Confirm Password</label><br>
+        <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px">
+    </div>
+
     @if(!empty($roles))
         <div style="margin-bottom:8px">
             <label for="roles">Roles</label><br>

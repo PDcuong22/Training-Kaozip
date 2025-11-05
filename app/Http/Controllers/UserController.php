@@ -5,16 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    protected $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $users = User::all();
+        $users = $this->userService->getAll();
         return view('users.index', compact('users'));
     }
 
@@ -24,7 +32,7 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::pluck('name', 'id');
-        $selected = ['viewer'];
+        $selected = [];
         return view('users.create', compact('roles', 'selected'));
     }
 
@@ -33,22 +41,15 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //validate input data
         $data = $request->validate([
             'name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
             'roles' => 'sometimes|array',
             'roles.*' => 'integer|exists:roles,id',
         ]);
 
-        $user = User::create([
-            'name'  => $data['name'],
-            'email' => $data['email'],
-        ]);
-
-        if (!empty($data['roles'])) {
-            $user->roles()->sync($data['roles']);
-        }
+        $user = $this->userService->create($data);
 
         return redirect()->route('users.edit', $user)->with('success', 'User created.');
     }
@@ -58,8 +59,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        // eager-load relations used in the view
-        $user->load(['roles', 'posts']);
+        $user = $this->userService->getById($user->id);
         return view('users.show', compact('user'));
     }
 
@@ -68,8 +68,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        // load roles for select and user's current roles
-        $user->load('roles');
+        $user = $this->userService->getByIdWithRoles($user->id);
         $roles = Role::pluck('name', 'id');
         $selected = $user->roles->pluck('id')->toArray();
 
@@ -84,19 +83,12 @@ class UserController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'password' => 'nullable|string|min:8|confirmed',
             'roles' => 'sometimes|array',
             'roles.*' => 'integer|exists:roles,id',
         ]);
 
-        $user->update([
-            'name' => $data['name'],
-            'email' => $data['email'],
-        ]);
-
-        if ($request->has('roles')) {
-            $roles = is_array($data['roles']) ? $data['roles'] : [];
-            $user->roles()->sync($roles);
-        }
+        $user = $this->userService->update($user->id, $data);
 
         return redirect()->route('users.edit', $user)->with('success', 'User updated.');
     }
@@ -106,7 +98,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $user->delete();
+        $this->userService->delete($user->id);
 
         return redirect()->route('users.index')->with('success', 'User deleted.');
     }

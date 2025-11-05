@@ -3,35 +3,54 @@
 @section('title', 'Users')
 
 @section('content')
-<h1>Users</h1>
-
-<p><a href="{{ route('users.create') }}">Create new user</a></p>
-
-@forelse($users as $user)
-    <div style="padding:8px;border-bottom:1px solid #eee; display:flex; align-items:center;">
-        <div style="flex:1">
-            <strong>#{{ $user->id }}</strong> — <a href="{{ route('users.show', $user) }}">{{ $user->name }}</a>
-            <div style="color:#666;font-size:0.9em">{{ $user->email }}</div>
-        </div>
-
-        <div>
-            <a href="{{ route('users.edit', $user) }}" style="margin-right:8px">Edit</a>
-
-            <form action="{{ route('users.destroy', $user) }}" method="POST" style="display:inline">
-                @csrf
-                @method('DELETE')
-                <button type="submit" onclick="return confirm('Delete this user?')">Delete</button>
-            </form>
-        </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h1>Users</h1>
+        <a href="{{ route('users.create') }}" style="background:#0366d6;color:#fff;padding:8px 12px;border-radius:4px;text-decoration:none">Create User</a>
     </div>
-@empty
-    <p>No users found.</p>
-@endforelse
 
-<!-- {{-- nếu $users là paginator --}}
-@if(method_exists($users, 'links'))
-    <div style="margin-top:12px">
+    @if(session('success'))
+        <div style="background:#d4edda;color:#155724;padding:12px;border-radius:4px;margin-bottom:16px">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <table style="width:100%;border-collapse:collapse">
+        <thead>
+            <tr style="background:#f1f3f5">
+                <th style="padding:12px;text-align:left;border-bottom:2px solid #dee2e6">ID</th>
+                <th style="padding:12px;text-align:left;border-bottom:2px solid #dee2e6">Name</th>
+                <th style="padding:12px;text-align:left;border-bottom:2px solid #dee2e6">Email</th>
+                <th style="padding:12px;text-align:left;border-bottom:2px solid #dee2e6">Roles</th>
+                <th style="padding:12px;text-align:left;border-bottom:2px solid #dee2e6">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($users as $user)
+                <tr style="border-bottom:1px solid #dee2e6">
+                    <td style="padding:12px">{{ $user->id }}</td>
+                    <td style="padding:12px">{{ $user->name }}</td>
+                    <td style="padding:12px">{{ $user->email }}</td>
+                    <td style="padding:12px">
+                        @if($user->roles->isNotEmpty())
+                            {{ $user->roles->pluck('name')->join(', ') }}
+                        @else
+                            <span style="color:#6c757d">No roles</span>
+                        @endif
+                    </td>
+                    <td style="padding:12px">
+                        <a href="{{ route('users.edit', $user) }}" style="color:#0366d6;text-decoration:none;margin-right:8px">Edit</a>
+                        <a href="{{ route('users.show', $user) }}" style="color:#28a745;text-decoration:none">View</a>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" style="padding:12px;text-align:center;color:#6c757d">No users found</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    <div style="margin-top:16px">
         {{ $users->links() }}
     </div>
-@endif -->
 @endsection
