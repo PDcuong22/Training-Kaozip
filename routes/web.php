@@ -22,12 +22,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    // Route::get('/users', function () {
-    //     return view('user.index');
-    // });
     Route::resource('users', UserController::class);
 });
-
-// Route::resource('users', UserController::class);
 
 require __DIR__.'/auth.php';
