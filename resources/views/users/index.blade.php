@@ -50,7 +50,4 @@
         </tbody>
     </table>
 
-    <div style="margin-top:16px">
-        {{ $users->links() }}
-    </div>
 @endsection

@@ -24,10 +24,12 @@
             @endif
         </div>
         <div style="margin-bottom:8px">
-            <strong>Created:</strong> {{ $user->created_at->format('Y-m-d H:i') }}
+            <strong>Created:</strong> 
+            {{ $user->created_at ? $user->created_at->format('Y-m-d H:i') : 'N/A' }}
         </div>
         <div>
-            <strong>Updated:</strong> {{ $user->updated_at->format('Y-m-d H:i') }}
+            <strong>Updated:</strong> 
+            {{ $user->updated_at ? $user->updated_at->format('Y-m-d H:i') : 'N/A' }}
         </div>
     </div>
 

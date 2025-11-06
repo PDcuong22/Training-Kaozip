@@ -13,6 +13,8 @@ class User extends Authenticatable
 
     protected $hidden = ['password'];
 
+    protected $with = ['roles']; 
+
     // Define the relationship with the Post model
     public function posts(){
         return $this->hasMany(Post::class);
